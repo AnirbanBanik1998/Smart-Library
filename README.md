@@ -23,3 +23,8 @@ python3 -m pip install flask
 python3 -m pip install Flask-SQLAlchemy
 python3 -m pip install pyjwt
 ```
+### Future goals
+1. Building app.
+2. Adding admin authorization.
+3. Constraining the number of books that can be issued.
+
