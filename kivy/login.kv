@@ -1,0 +1,33 @@
+#:kivy 1.11.1
+
+
+<BoxLayout>:
+	orientation: "vertical"
+	spacing: 10
+	padding: 10
+
+	Label:
+		id: reg_label
+		text: "Registration No"
+		size_hint: 1,.2
+		
+	TextInput:
+		id: regno
+		multiline: False
+		size_hint: 1,.2
+		
+	Label:
+		id: password_label
+		text: "Password"
+		size_hint: 1,.2
+	TextInput:
+		id:password
+		password: True #hide password
+		multiline: False
+		size_hint: 1,.2
+
+	Button:
+		text: "Login"
+		#on_release: root.authenticate()
+		size_hint: .2,.2
+		pos_hint: {"center_x": .5}
