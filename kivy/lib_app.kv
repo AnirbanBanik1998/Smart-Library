@@ -1,0 +1,185 @@
+#:kivy 1.11.1
+
+ScreenManager:
+	LoginScreen:
+	DashboardScreen:
+<LoginScreen>:
+	name: "login_screen"
+	BoxLayout:
+		orientation: "vertical"
+		spacing: 10
+		padding: 10
+
+		Image:
+			source: "kivy_logo.png"
+			size:self.texture_size
+
+		CustomLabel
+			id: reg_label
+			text: "Registration No"
+
+			
+		CustomTextInput
+			id: regno
+			hint_text: "Registration No."
+
+		CustomLabel
+			id: password_label
+			text: "Password"
+
+		CustomTextInput
+			id:password
+			password: True #hide password
+			hint_text: "Password"
+
+		CustomButton:
+			text: "LOGIN"
+			#on_release: root.authenticate()
+			pos_hint: {"center_x": .5}
+			on_press:
+				root.manager.transition.direction = "left"
+				root.manager.current = "dashboard_screen"
+				
+<SelectableBook>:
+	#Draw a background to indicate selection
+	canvas.before:
+		Color:
+            rgba: (0, 0.517, 0.705, 1) if self.selected else (0, 0.517, 0.705, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    background_color: [1, 0, 0, 1]  if self.selected else [1, 1, 1, 1]  # dark red else dark grey
+    #on_release: app.root.delete_row(self)
+
+<BookDb>:
+	column_headings: column_headings
+    orientation: "vertical"
+
+    Label:
+        canvas.before:
+            Color:
+                rgba: (0, 0, 1, .5)     # 50% translucent blue
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        text: 'Click on any row to delete'
+        size_hint: 1, 0.1
+
+    GridLayout:
+        canvas.before:
+            Color:
+                rgba: (1, 0.2, 0, .5)     # 50% translucent orange red
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        id: column_headings
+        size_hint: 1, None
+        size_hint_y: None
+        height: 25
+        cols: 3
+
+    BoxLayout:
+        canvas.before:
+            Color:
+                rgba: (.0, 0.9, .1, .3)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        RecycleView:
+            viewclass: 'SelectableBook'
+            data: root.rv_data
+            SelectableRecycleGridLayout:
+                cols: 3
+                key_selection: 'selectable'
+                default_size: None, dp(26)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                multiselect: True
+                touch_multiselect: True
+
+<DashboardScreen>
+	name: "dashboard_screen"
+	
+	BoxLayout:
+		orientation: "vertical"
+		spacing: 10
+		padding: 10
+
+		CustomLabel:
+			text:"Dashboard"
+			id:dashboard_label
+		
+		CustomLabel:
+			text:"List of Books"
+			id:list_label
+			color: 1,1,1,1
+		
+		BookDb:
+
+		GridLayout:
+			cols:3
+			rows:1
+			spacing:10
+			padding:10
+
+			CustomButton:
+				text:"Issue"
+
+			CustomButton:
+				text: "Return"
+
+			CustomButton:
+				text:"Back"
+				on_press:
+					root.manager.transition.direction ="right"
+					root.manager.current = "login_screen"
+
+				
+
+
+
+
+
+<LabelColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+# Now you can simply Mix the `BackgroundColor` class with
+# any other widget... to give it a background.
+
+<CustomButton@Button>
+	font_size: "18sp"
+	padding: 10,10
+	height: self.texture_size[1] + self.padding_y
+	size_hint: .2,None
+	background_normal: " "
+	background_color: (0.957,0.263,0.212,1)
+	bold: True
+
+<CustomLabel@Label+LabelColor>
+	background_color:0,0,0,0
+	color: 0.957,0.263,0.212,1
+	font_size: "26sp"
+	padding: 10,10
+	text_size: self.width, None
+	halign: "center"
+	size_hint_y:None
+	height: self.texture_size[1]
+	pos_hint: {"center_x": .5}
+
+<CustomTextInput@TextInput>
+	font_size: "22sp"
+	padding: 10,10
+	text_size: None, self.height
+	halign: "left"
+	pos_hint: {"center_x": .5}
+	multiline: False
+	height:self.minimum_height
+	size_hint: 0.5,None
