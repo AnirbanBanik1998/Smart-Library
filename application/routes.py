@@ -9,8 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # This route is used to get the list of all students. Primarily required for testing purposes.
 @app.route('/get_students', methods=['GET'])
-@token_required
-def get_students(current_user):
+def get_students():
     students_list = []
     students = Student.query.all()
 
@@ -25,8 +24,7 @@ def get_students(current_user):
 
 # This is required to get the details of a book, like it's barcode id, rack no. just from it's name. To be improved upon
 @app.route('/get_book_details/<name>', methods=['GET'])
-@token_required
-def get_book_details(current_user, name):
+def get_book_details(name):
     books = Book.query.filter_by(name=name, tag=False).all()
 
     books_list = []
@@ -83,9 +81,12 @@ def register():
 
     if not student:
         return jsonify({'message': 'Student not enrolled!'})
+    if student.password:
+        return jsonify({'message': 'Student already registered!'})
 
     hashed_password = generate_password_hash(data['password'], method='sha256')
     student.password = hashed_password
+    student.num_of_books = 0
     db.session.commit()
 
     return jsonify({'message': 'Student registered successfully!'})
@@ -107,13 +108,14 @@ def book_issue(current_user, book_id):
             return jsonify({'message': 'Cannot return book'})
     
     # If regular student at library, or at least has come more than once. Checking if student is issuing book in library.
-    if not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0):
+    if not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0) or current_user.num_of_books == 5:
         return jsonify({'message': 'Cannot issue book'})
     
     # Assigning the book to the student
     book.assignee = current_user
     book.tag = True
     book.issued_at = current_time
+    current_user.num_of_books += 1
 
     db.session.commit()
 
@@ -133,11 +135,12 @@ def book_return(current_user, book_id):
         if not book:
             return jsonify({'message': 'Cannot return book'})
 
-    if not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0):
+    if not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0) or current_user.num_of_books == 0:
         return jsonify({'message': 'Cannot return book'})
 
     book.assignee = None
     book.tag = False
+    current_user.num_of_books -= 1
 
     db.session.commit()
 
