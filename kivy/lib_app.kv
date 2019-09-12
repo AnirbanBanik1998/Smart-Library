@@ -34,11 +34,8 @@ ScreenManager:
 
 		CustomButton:
 			text: "LOGIN"
-			#on_release: root.authenticate()
+			on_release: root.authenticate()
 			pos_hint: {"center_x": .5}
-			on_press:
-				root.manager.transition.direction = "left"
-				root.manager.current = "dashboard_screen"
 				
 <SelectableBook>:
 	#Draw a background to indicate selection

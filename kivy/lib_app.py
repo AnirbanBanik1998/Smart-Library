@@ -10,7 +10,10 @@ from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.recycleview import RecycleView
-import pandas
+
+import requests
+
+#import pandas
 
 class SelectableRecycleGridLayout(FocusBehavior, LayoutSelectionBehavior,
                                  RecycleGridLayout):
@@ -45,7 +48,17 @@ class SelectableBook(RecycleDataViewBehavior, Label):
             print("selection removed for {0}".format(rv.data[index]))
 
 class LoginScreen(Screen):
-	pass
+	#Implement authorization functionality
+    def authenticate(self):
+        reg_no = self.ids['regno'].text
+        password = self.ids['password'].text
+        resp = requests.get('http://127.0.0.1:5000/login', auth=(reg_no, password))
+        if resp.status_code == 200:
+            #resp.json()['token']
+            self.manager.transition.direction = 'left'
+            self.manager.current = 'dashboard_screen'
+        else:
+            self.manager.current = 'login_screen'
 
 class DashboardScreen(Screen):
 	pass
@@ -57,7 +70,7 @@ class BookDb(BoxLayout):
 
     def __init__(self, **kwargs):
         super(BookDb, self).__init__(**kwargs)
-        self.get_dataframe()
+        #self.get_dataframe()
 
     def get_dataframe(self):
         df = pandas.read_excel("booklist.xlsx")
@@ -86,7 +99,7 @@ class BookDb(BoxLayout):
 class LoginApp(App):
 
 	def build(self):
-		return Builder.load_file("login.kv")
+		return Builder.load_file("lib_app.kv")
 
 if __name__ == '__main__':
 	LoginApp().run()

@@ -10,7 +10,7 @@ class Student(db.Model):
     password = db.Column(db.String(50))
     last_intime = db.Column(db.DateTime, nullable=True)
     last_outtime = db.Column(db.DateTime, nullable=True)
-    num_of_books = db.Column(db.Integer)
+    num_of_books = db.Column(db.Integer, nullable=True)
     books = db.relationship('Book', backref='assignee')
 
 # Class Book representing a table book
