@@ -1,5 +1,17 @@
 # Smart-Library
 
+## Running
+
+* Start the server:
+```
+python3 run.py
+```
+* Run the kivy app:
+```
+cd kivy
+python3 lib_app.py
+```
+
 ### Installing libraries(Linux)
 
 1. Requires Python 3.x
@@ -26,5 +38,5 @@ python3 -m pip install pyjwt
 ### Future goals
 1. Building app.
 2. Adding admin authorization.
-
+3. Interfacing the hardware circuit.
 
