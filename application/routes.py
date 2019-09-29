@@ -1,10 +1,33 @@
 from flask import request, jsonify, make_response
-from application import app, db, token_required
+from application import app, db
 from application.models import Student, Book
 import uuid
 import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+
+
+# Making the token_required wrapper functionality
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message': 'Token is missing'})
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = Student.query.filter_by(reg_no=data['reg_no']).first()
+        except:
+            return jsonify({'message': 'Token is invalid'})
+
+        return f(current_user, *args, **kwargs)
+    return decorated
 
 
 # This route is used to get the list of all students. Primarily required for testing purposes.
@@ -101,11 +124,11 @@ def book_issue(current_user, book_id):
     
     # For first timers
     if current_user.last_intime is None:
-        return jsonify({'message': 'Cannot return book'})
+        return jsonify({'message': 'Cannot issue book'})
         
     if current_user.last_outtime is None:
         if not book:
-            return jsonify({'message': 'Cannot return book'})
+            return jsonify({'message': 'Cannot issue book'})
     
     # If regular student at library, or at least has come more than once. Checking if student is issuing book in library.
     if not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0) or current_user.num_of_books == 5:
