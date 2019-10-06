@@ -38,6 +38,7 @@ python3 -m pip install pyjwt
 python3 -m pip install pillow
 python3 -m pip install pyzbar
 python3 -m pip install pyzbar[scripts]
+python3 -m pip install pyserial
 ```
 ### Future goals
 1. Building app.
