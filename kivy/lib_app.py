@@ -13,7 +13,8 @@ from kivy.uix.recycleview import RecycleView
 
 import requests
 
-#import pandas
+token = None
+url = 'http://192.168.43.164:5000'
 
 class SelectableRecycleGridLayout(FocusBehavior, LayoutSelectionBehavior,
                                  RecycleGridLayout):
@@ -50,17 +51,21 @@ class SelectableBook(RecycleDataViewBehavior, Label):
 class LoginScreen(Screen):
 	#Implement authorization functionality
     def authenticate(self):
+        global token
         reg_no = self.ids['regno'].text
         password = self.ids['password'].text
-        resp = requests.get('http://127.0.0.1:5000/login', auth=(reg_no, password))
+        resp = requests.get('{}/login'.format(url), auth=(reg_no, password))
         if resp.status_code == 200:
-            #resp.json()['token']
+            token = resp.json()['token']
+            print(token)
             self.manager.transition.direction = 'left'
             self.manager.current = 'dashboard_screen'
+            BookDb().get_dataframe()
         else:
             self.manager.current = 'login_screen'
 
 class DashboardScreen(Screen):
+
 	pass
 
 class BookDb(BoxLayout):
@@ -70,21 +75,39 @@ class BookDb(BoxLayout):
 
     def __init__(self, **kwargs):
         super(BookDb, self).__init__(**kwargs)
-        #self.get_dataframe()
+        print('Book db called')
+        try:
+            self.get_dataframe()
+        except Exception as e:
+            print(e)
 
     def get_dataframe(self):
-        df = pandas.read_excel("booklist.xlsx")
+        global token
+        headers = {'x-access-token': token}
+        res = requests.get('{}/get_books'.format(url), headers=headers)
+        if res.status_code != 200:
+            return
 
         # Extract and create column headings
-        # for heading in df.columns:
-        #     self.column_headings.add_widget(Label(text=heading))
+        #for heading in df.columns:
+        #    self.column_headings.add_widget(Label(text=heading))
+        book_list = res.json()['books']
+        for book in book_list:
+            for key in book:
+                self.column_headings.add_widget(Label(text=key))
+                print(key)
 
         # Extract and create rows
+        '''
         data = []
         for row in df.itertuples():
             for i in range(1, len(row)):
                 data.append([row[i], row[0]])
         self.rv_data = [{'text': str(x[0]), 'Index': str(x[1]), 'selectable': True} for x in data]
+        '''
+        data = []
+        for book in book_list:
+            self.rv_data.append(book)
 
     def delete_row(self, instance):
         # TODO
