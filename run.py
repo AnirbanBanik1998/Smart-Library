@@ -5,6 +5,5 @@ from application.models import Student, Book
 #Creating the database tables
 db.create_all()
 
-#Running the application in debug mode
-app.run(debug=True)
-
+#Running the application
+app.run(host='0.0.0.0', port=5000)

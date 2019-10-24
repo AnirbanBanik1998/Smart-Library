@@ -46,8 +46,9 @@ def get_students():
     return jsonify({'students': students_list})
 
 # This is required to get the details of a book, like it's barcode id, rack no. just from it's name. To be improved upon
-@app.route('/get_book_details/<name>', methods=['GET'])
-def get_book_details(name):
+@app.route('/get_book_details', methods=['POST'])
+def get_book_details():
+    name = request.get_json()['name']
     books = Book.query.filter_by(name=name, tag=False).all()
 
     books_list = []
@@ -79,7 +80,8 @@ def get_books(current_user):
 @app.route('/student', methods=['POST'])
 def post_student():
     data = request.get_json()
-    new_student = Student(reg_no=data['reg_no'], rfid_id = str(uuid.uuid4()), name= data['name'])
+    #new_student = Student(reg_no=data['reg_no'], rfid_id = str(uuid.uuid4()), name= data['name'])
+    new_student = Student(reg_no=data['reg_no'], rfid_id = data['rfid_id'], name= data['name'])
     db.session.add(new_student)
     db.session.commit()
 
@@ -196,6 +198,8 @@ def login():
 def entry_exit():
     data = request.get_json()
     student = Student.query.filter_by(rfid_id=data['rfid_id']).first()
+    if student is None:
+        return jsonify({'message': 'Student not registered'})
     
     # If intime is none, then student is a first timer and is entering the library for the first time.
     if student.last_intime is None:
