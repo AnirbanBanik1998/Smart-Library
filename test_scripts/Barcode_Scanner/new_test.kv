@@ -1,0 +1,42 @@
+#:kivy 1.11.1
+
+ScreenManager:
+    MenuScreen:
+    ScannerScreen:
+
+
+<MenuScreen>:
+    name: 'menu'
+    BoxLayout:
+        Button:
+            text: 'Issue'
+            on_release: 
+                root.manager.transition.direction = "right"
+                root.manager.current = 'barcode_scanner'
+<ScannerScreen>:
+    name: 'barcode_scanner'
+    orientation: 'vertical'
+    GridLayout:
+        cols: 1
+        Camera:
+            id: camera
+            resolution: (640, 480)
+            play: True
+        #ToggleButton:
+        #    text: 'Play'
+        #    on_press: camera.play = not camera.play
+        #    size_hint_y: None
+        #    height: '48dp'
+        Button:
+            text: 'Scan'
+            size_hint_y: None
+            height: '48dp'
+            #on_press: root.capture()
+            on_release:
+                root.capture() 
+                root.manager.transition.direction = "left"
+                root.manager.current = 'menu'
+
+
+
+
