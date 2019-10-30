@@ -77,26 +77,65 @@ def get_books(current_user):
     return jsonify({'books': books_list})
 
 # This is used to post a student to the library database. To be performed by admins.
-@app.route('/student', methods=['POST'])
-def post_student():
+@app.route('/add_student', methods=['POST'])
+def add_student():
     data = request.get_json()
     #new_student = Student(reg_no=data['reg_no'], rfid_id = str(uuid.uuid4()), name= data['name'])
     new_student = Student(reg_no=data['reg_no'], rfid_id = data['rfid_id'], name= data['name'])
     db.session.add(new_student)
     db.session.commit()
 
-    return jsonify({'message': 'Student registered!'})
+    return jsonify({'message': 'Student added!'})
+
+# This is used to update student details, mainly for changing lib cards
+@app.route('/update_student/<reg_no>', methods=['PUT'])
+def update_student(reg_no):
+    data = request.get_json()
+    student = Student.query.filter_by(reg_no=reg_no).first()
+    if not student:
+        return jsonify({'message': 'Student not found'})
+
+    student.name = data['name']
+    student.rfid_id = data['rfid_id']
+    db.session.commit()
+
+    return jsonify({'message': 'Student updated!'})
+
+# This route is used to delete student details from database
+@app.route('/delete_student/<reg_no>', methods=['DELETE'])
+def delete_student(reg_no):
+    student = Student.query.filter_by(reg_no=reg_no).first()
+    if not student:
+        return jsonify({'message': 'Student not found!'})
+
+    db.session.delete(student)
+    db.session.commit()
+
+    return jsonify({'message': 'Student deleted!'})
+
 
 # This is used to add a book to the library database. Also performed by the admins.
-@app.route('/book', methods=['POST'])
-def post_book():
+@app.route('/add_book', methods=['POST'])
+def add_book():
     data = request.get_json()
 
     new_book = Book(barcode_id = str(uuid.uuid4()), name = data['name'], tag=False)
     db.session.add(new_book)
     db.session.commit()
 
-    return jsonify({'message': 'Book Registered'})
+    return jsonify({'message': 'Book added!'})
+
+# This is used to delete a book from the database
+@app.route('/delete_book/<barcode_id>', methods=['DELETE'])
+def delete_book(barcode_id):
+    book = Book.query.filter_by(barcode_id=barcode_id)
+    if not book:
+        return jsonify({'message': 'Book not found'})
+
+    db.session.delete(book)
+    db.session.commit()
+
+    return jsonify({'message': 'Book removed!'})
 
 # This is used to register the students through the app. The student has to enter name, reg_no, and password as details.
 @app.route('/register', methods=['PUT'])
@@ -125,15 +164,15 @@ def book_issue(current_user, book_id):
     current_time = datetime.datetime.utcnow()
     
     # For first timers
-    if current_user.last_intime is None:
+    if not current_user.last_intime:
         return jsonify({'message': 'Cannot issue book'})
         
-    if current_user.last_outtime is None:
-        if not book:
-            return jsonify({'message': 'Cannot issue book'})
+    if not current_user.last_outtime:
+        if not book or current_user.num_of_books == 5:
+            return jsonify({'message': 'Cannot issue book'})    
     
     # If regular student at library, or at least has come more than once. Checking if student is issuing book in library.
-    if not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0) or current_user.num_of_books == 5:
+    elif not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0) or current_user.num_of_books == 5:
         return jsonify({'message': 'Cannot issue book'})
     
     # Assigning the book to the student
@@ -153,14 +192,15 @@ def book_return(current_user, book_id):
     book = Book.query.filter_by(barcode_id=book_id, tag=True, assignee=current_user).first()
 
     current_time = datetime.datetime.utcnow()
-    if current_user.last_intime is None:
+
+    if not current_user.last_intime:
         return jsonify({'message': 'Cannot return book'})
 
-    if current_user.last_outtime is None:
-        if not book:
+    if not current_user.last_outtime:
+        if not book or current_user.num_of_books == 0:
             return jsonify({'message': 'Cannot return book'})
 
-    if not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0) or current_user.num_of_books == 0:
+    elif not book or ((current_time-current_user.last_intime).total_seconds()<0 or (current_user.last_intime-current_user.last_outtime).total_seconds()<0) or current_user.num_of_books == 0:
         return jsonify({'message': 'Cannot return book'})
 
     book.assignee = None
@@ -198,7 +238,7 @@ def login():
 def entry_exit():
     data = request.get_json()
     student = Student.query.filter_by(rfid_id=data['rfid_id']).first()
-    if student is None:
+    if not student:
         return jsonify({'message': 'Student not registered'})
     
     # If intime is none, then student is a first timer and is entering the library for the first time.
