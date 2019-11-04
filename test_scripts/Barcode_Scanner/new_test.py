@@ -31,10 +31,12 @@ class ScannerScreen(Screen):
     def decode(self, img_file):
         img = Image.open(img_file)
         supported_types = ['EAN8', 'EAN13', 'CODE39', 'CODE128']
-        barcode = decode(img)[0]
-        if barcode.type in supported_types:
-            return barcode.data.decode('utf-8')
-
+        try:
+            barcode = decode(img)[0]
+            if barcode.type in supported_types:
+                return barcode.data.decode('utf-8')
+        except Exception as e:
+            print(e)
         return None
 
     def issue(barcode_id):
