@@ -75,6 +75,7 @@ ScreenManager:
         size_hint_y: None
         height: 25
         cols: 3
+        
 
     BoxLayout:
         canvas.before:
@@ -85,6 +86,7 @@ ScreenManager:
                 size: self.size
 
         RecycleView:
+            id: rvlist
             viewclass: 'SelectableBook'
             data: root.rv_data
             SelectableRecycleGridLayout:
@@ -96,6 +98,15 @@ ScreenManager:
                 height: self.minimum_height
                 multiselect: True
                 touch_multiselect: True
+    GridLayout:
+        rows:1
+	    spacing:10
+		padding:10
+        CustomButton:
+			text: "Update"
+			on_release: root.update_data()
+			pos_hint: {"center_x": .5}
+        
 
 <DashboardScreen>
 	name: "dashboard_screen"

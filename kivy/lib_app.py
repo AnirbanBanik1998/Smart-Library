@@ -10,6 +10,7 @@ from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.recycleview import RecycleView
+from kivy.clock import Clock
 
 import requests
 
@@ -60,13 +61,25 @@ class LoginScreen(Screen):
             print(token)
             self.manager.transition.direction = 'left'
             self.manager.current = 'dashboard_screen'
-            BookDb().get_dataframe()
+            #book = BookDb()
+            #book.update_data()
         else:
             self.manager.current = 'login_screen'
 
 class DashboardScreen(Screen):
-
-	pass
+    pass
+    '''
+	def __init__(self, **kwargs):
+	    super(DashboardScreen, self).__init__(**kwargs)
+	    Clock.schedule_once(self.finish_init,0)
+	
+	def finish_init(self, dt):
+	    global token
+	    while True:
+	        if token is not None:
+	            break
+	    return
+	'''
 
 class BookDb(BoxLayout):
     book_list = ObjectProperty(None)
@@ -76,10 +89,13 @@ class BookDb(BoxLayout):
     def __init__(self, **kwargs):
         super(BookDb, self).__init__(**kwargs)
         print('Book db called')
-        try:
-            self.get_dataframe()
-        except Exception as e:
-            print(e)
+        self.init_dataframe()
+        
+    def init_dataframe(self):
+        self.rv_data = [{'text': 'Text', 'Index': '0', 'selectable': True}, 
+                {'text': 'Text', 'Index': '0', 'selectable': True}, 
+                {'text': 'Text', 'Index': '0', 'selectable': True}]
+        
 
     def get_dataframe(self):
         global token
@@ -91,32 +107,29 @@ class BookDb(BoxLayout):
         # Extract and create column headings
         #for heading in df.columns:
         #    self.column_headings.add_widget(Label(text=heading))
+        
         book_list = res.json()['books']
-        for book in book_list:
-            for key in book:
-                self.column_headings.add_widget(Label(text=key))
-                print(key)
-
+        '''
+        for key in book_list[0]:
+            self.column_headings.add_widget(Label(text=key))
+            print(key)
+        '''
         # Extract and create rows
-        '''
         data = []
-        for row in df.itertuples():
-            for i in range(1, len(row)):
-                data.append([row[i], row[0]])
-        self.rv_data = [{'text': str(x[0]), 'Index': str(x[1]), 'selectable': True} for x in data]
-        '''
-        data = []
+        index = 0
         for book in book_list:
-            self.rv_data.append(book)
-
-    def delete_row(self, instance):
-        # TODO
-        print("delete_row:")
-        print("Button: text={0}, index={1}".format(instance.text, instance.index))
-        print(self.rv_data[instance.index])
-        print("Pandas: Index={}".format(self.rv_data[instance.index]['Index']))
-
-
+            for val in book.values():
+                data.append({'text':val, 'Index':str(index), 'selectable':True})
+            index += 1
+        self.rv_data = data
+        #print(self.rv_data)
+        
+    def update_data(self):
+        self.get_dataframe()
+        #print('\n'+str(self.ids.rvlist.data))
+        self.ids.rvlist.data = self.rv_data
+        #print('\n'+str(self.ids.rvlist.data))
+        self.ids.rvlist.refresh_from_data()
 
 
 class LoginApp(App):
