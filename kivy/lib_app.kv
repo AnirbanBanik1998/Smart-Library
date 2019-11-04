@@ -11,7 +11,7 @@ ScreenManager:
 		padding: 10
 
 		Image:
-			source: "kivy_logo.png"
+			source: "lib_app_logo.jpg"
 			size:self.texture_size
 
 		CustomLabel
@@ -41,7 +41,7 @@ ScreenManager:
 	#Draw a background to indicate selection
 	canvas.before:
 		Color:
-            rgba: (0, 0.517, 0.705, 1) if self.selected else (0, 0.517, 0.705, 1)
+            rgba: rgba("#303f9f")
         Rectangle:
             pos: self.pos
             size: self.size
@@ -49,38 +49,19 @@ ScreenManager:
     #on_release: app.root.delete_row(self)
 
 <BookDb>:
-	column_headings: column_headings
     orientation: "vertical"
-
-    Label:
-        canvas.before:
-            Color:
-                rgba: (0, 0, 1, .5)     # 50% translucent blue
-            Rectangle:
-                pos: self.pos
-                size: self.size
-        text: 'Click on any row to delete'
-        size_hint: 1, 0.1
-
+    padding_left: 10
+    padding_right: 10
+    padding_bottom: 10
+    spacing: 10
     GridLayout:
+    	orientation: "vertical"
+    	cols: 1
+    	size_hint_y: None
+    	height: dp(150)
         canvas.before:
             Color:
-                rgba: (1, 0.2, 0, .5)     # 50% translucent orange red
-            Rectangle:
-                pos: self.pos
-                size: self.size
-
-        id: column_headings
-        size_hint: 1, None
-        size_hint_y: None
-        height: 25
-        cols: 3
-        
-
-    BoxLayout:
-        canvas.before:
-            Color:
-                rgba: (.0, 0.9, .1, .3)
+                rgba: rgba("#9fa8da")
             Rectangle:
                 pos: self.pos
                 size: self.size
@@ -92,21 +73,23 @@ ScreenManager:
             SelectableRecycleGridLayout:
                 cols: 3
                 key_selection: 'selectable'
-                default_size: None, dp(26)
+                default_size: None, dp(30)
                 default_size_hint: 1, None
                 size_hint_y: None
                 height: self.minimum_height
                 multiselect: True
                 touch_multiselect: True
-    GridLayout:
-        rows:1
-	    spacing:10
-		padding:10
-        CustomButton:
+
+    BoxLayout:
+		orientation: "vertical"
+		spacing: 10
+		padding: 10
+
+	    CustomButton:
 			text: "Update"
 			on_release: root.update_data()
 			pos_hint: {"center_x": .5}
-        
+	        
 
 <DashboardScreen>
 	name: "dashboard_screen"
