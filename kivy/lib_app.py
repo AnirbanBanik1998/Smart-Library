@@ -125,7 +125,7 @@ class BookDb(BoxLayout):
 class LoginApp(App):
 
 	def build(self):
-		return Builder.load_file("recycle.kv")
+		return Builder.load_file("lib_app.kv")
 
 if __name__ == '__main__':
 	LoginApp().run()
