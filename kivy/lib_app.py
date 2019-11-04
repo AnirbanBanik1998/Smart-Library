@@ -10,12 +10,14 @@ from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.recycleview import RecycleView
-from kivy.clock import Clock
 
+import socket
 import requests
 
 token = None
-url = 'http://192.168.43.164:5000'
+host_name = socket.gethostname()
+host_ip = socket.gethostbyname(host_name)
+url = 'http://{}:5000'.format(host_ip)
 
 class SelectableRecycleGridLayout(FocusBehavior, LayoutSelectionBehavior,
                                  RecycleGridLayout):
@@ -68,18 +70,6 @@ class LoginScreen(Screen):
 
 class DashboardScreen(Screen):
     pass
-    '''
-	def __init__(self, **kwargs):
-	    super(DashboardScreen, self).__init__(**kwargs)
-	    Clock.schedule_once(self.finish_init,0)
-	
-	def finish_init(self, dt):
-	    global token
-	    while True:
-	        if token is not None:
-	            break
-	    return
-	'''
 
 class BookDb(BoxLayout):
     book_list = ObjectProperty(None)
@@ -89,7 +79,7 @@ class BookDb(BoxLayout):
     def __init__(self, **kwargs):
         super(BookDb, self).__init__(**kwargs)
         print('Book db called')
-        self.init_dataframe()
+        #self.init_dataframe()
         
     def init_dataframe(self):
         self.rv_data = [{'text': 'Text', 'Index': '0', 'selectable': True}, 
@@ -122,20 +112,20 @@ class BookDb(BoxLayout):
                 data.append({'text':val, 'Index':str(index), 'selectable':True})
             index += 1
         self.rv_data = data
-        #print(self.rv_data)
+        print(self.rv_data)
         
     def update_data(self):
         self.get_dataframe()
-        #print('\n'+str(self.ids.rvlist.data))
+        print('\n'+str(self.ids.rvlist.data))
         self.ids.rvlist.data = self.rv_data
-        #print('\n'+str(self.ids.rvlist.data))
+        print('\n'+str(self.ids.rvlist.data))
         self.ids.rvlist.refresh_from_data()
 
 
 class LoginApp(App):
 
 	def build(self):
-		return Builder.load_file("lib_app.kv")
+		return Builder.load_file("recycle.kv")
 
 if __name__ == '__main__':
 	LoginApp().run()
