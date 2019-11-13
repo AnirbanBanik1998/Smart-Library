@@ -3,6 +3,8 @@
 ScreenManager:
 	LoginScreen:
 	DashboardScreen:
+	ScannerScreen:
+	
 <LoginScreen>:
 	name: "login_screen"
 	BoxLayout:
@@ -71,7 +73,7 @@ ScreenManager:
             viewclass: 'SelectableBook'
             data: root.rv_data
             SelectableRecycleGridLayout:
-                cols: 3
+                cols: 2
                 key_selection: 'selectable'
                 default_size: None, dp(30)
                 default_size_hint: 1, None
@@ -111,17 +113,17 @@ ScreenManager:
 		BookDb:
 
 		GridLayout:
-			cols:3
+			cols:2
 			rows:1
 			spacing:10
 			padding:10
 
 			CustomButton:
-				text:"Issue"
-
-			CustomButton:
-				text: "Return"
-
+				text:"Issue/Return"
+				on_press:
+					root.manager.transition.direction ="left"
+					root.manager.current = "barcode_scanner"
+				
 			CustomButton:
 				text:"Back"
 				on_press:
@@ -129,7 +131,53 @@ ScreenManager:
 					root.manager.current = "login_screen"
 
 				
+<ScannerScreen>:
+    name: 'barcode_scanner'
+    BoxLayout:
+		orientation: "vertical"
+		spacing: 10
+		padding: 10
+		
+        BoxLayout:
+		    orientation: "vertical"
+		    spacing: 10
+		    padding: 10
 
+		    Image:
+		        id: img
+			    source: "default.png"
+			    size:self.texture_size
+
+		    CustomLabel
+			    id: name
+			    text: "Book Name"
+			
+		    CustomTextInput
+			    id: book_name
+			    hint_text: "Book Name"
+			
+		    CustomButton:
+			    text: "Upload"
+			    on_release: root.request()
+			    pos_hint: {"center_x": .5}
+        
+        GridLayout:
+		    cols:3
+		    rows:1
+		    spacing:10
+		    padding:10
+
+		    CustomButton:
+			    text:"Issue"
+
+		    CustomButton:
+			    text: "Return"
+			    
+			CustomButton:
+			    text: "Back"
+			    on_press:
+					root.manager.transition.direction ="right"
+					root.manager.current = "dashboard_screen"
 
 
 

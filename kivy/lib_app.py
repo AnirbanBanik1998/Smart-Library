@@ -11,8 +11,10 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.recycleview import RecycleView
 
-import socket
+import os, socket
 import requests
+from pyzbar.pyzbar import decode
+from PIL import Image 
 
 token = None
 host_name = socket.gethostname()
@@ -121,6 +123,39 @@ class BookDb(BoxLayout):
         print('\n'+str(self.ids.rvlist.data))
         self.ids.rvlist.refresh_from_data()
 
+class ScannerScreen(Screen):
+    img_path = '../Books'
+    def __init__(self, **kwargs):
+        super(ScannerScreen, self).__init__(**kwargs)
+        print('Entered Scanner')
+        
+    def request(self):
+        book_name = self.ids['book_name'].text
+        png = '{}.png'.format(book_name)
+        jpg = '{}.jpg'.format(book_name)
+        img_file = ''
+        if png in os.listdir(self.img_path):
+            img_file = '{}/{}'.format(self.img_path, png)
+            barcode = self.decode(img_file)
+        elif jpg in os.listdir(self.img_path):
+            img_file = '{}/{}'.format(self.img_path, jpg)
+            barcode = self.decode(img_file)
+        else:
+            return
+
+        self.ids['img'].source = img_file
+        print(barcode)
+        
+    def decode(self, img_file):
+        img = Image.open(img_file)
+        try:
+            barcode = decode(img)[0]
+            if barcode:
+                return barcode.data.decode('utf-8')
+        except Exception as e:
+            print(e)
+
+        return None
 
 class LoginApp(App):
 
