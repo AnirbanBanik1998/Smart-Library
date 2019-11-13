@@ -44,6 +44,21 @@ def get_students():
         students_list.append(stud)
 
     return jsonify({'students': students_list})
+    
+# This route is used to get the list of all books. Primarily required for testing purposes.
+@app.route('/get_all_books', methods=['GET'])
+def get_all_books():
+    book_list = []
+    books = Book.query.all()
+
+    for book in books:
+        bk = {}
+        bk['name'] = book.name
+        bk['barcode_id'] = book.barcode_id
+        bk['taken'] = book.tag
+        book_list.append(bk)
+
+    return jsonify({'books': book_list})
 
 # This is required to get the details of a book, like it's barcode id, rack no. just from it's name. To be improved upon
 @app.route('/get_book_details', methods=['POST'])
@@ -70,7 +85,6 @@ def get_books(current_user):
     for book in books:
         bk = {}
         bk['name'] = book.name
-        bk['barcode_id'] = book.barcode_id
         bk['issued_at'] = book.issued_at
         books_list.append(bk)
 
