@@ -65,10 +65,34 @@ class LoginScreen(Screen):
             print(token)
             self.manager.transition.direction = 'left'
             self.manager.current = 'dashboard_screen'
-            #book = BookDb()
-            #book.update_data()
         else:
             self.manager.current = 'login_screen'
+
+class RegScreen(Screen):
+    #Implement registration functionality
+    def register(self):
+        '''TODO'''
+        global token
+        reg_no = self.ids['regno'].text
+        name = self.ids['name'].text 
+        password = self.ids['password'].text
+        confirm_password = self.ids['confirm_password'].text
+
+        headers = {'x-access-token': token}
+        if password != confirm_password:
+            self.manager.current = 'reg_screen'
+            print('Student not enrolled!')
+            return
+        payload = {'reg_no': reg_no, 
+                    'name': name,
+                    'password': password}
+        resp = requests.put('{}/register'.format(url), headers=headers, json=payload)
+        if resp.status_code == 200:
+            print(resp.json())
+            self.manager.transition.direction = 'left'
+            self.manager.current = 'login_screen'
+        else:
+            self.manager.current = 'reg_screen'
 
 class DashboardScreen(Screen):
     pass
@@ -125,26 +149,27 @@ class BookDb(BoxLayout):
 
 class ScannerScreen(Screen):
     img_path = '../Books'
+    barcode = None
     def __init__(self, **kwargs):
         super(ScannerScreen, self).__init__(**kwargs)
         print('Entered Scanner')
         
-    def request(self):
+    def upload(self):
         book_name = self.ids['book_name'].text
         png = '{}.png'.format(book_name)
         jpg = '{}.jpg'.format(book_name)
         img_file = ''
         if png in os.listdir(self.img_path):
             img_file = '{}/{}'.format(self.img_path, png)
-            barcode = self.decode(img_file)
+            self.barcode = self.decode(img_file)
         elif jpg in os.listdir(self.img_path):
             img_file = '{}/{}'.format(self.img_path, jpg)
-            barcode = self.decode(img_file)
+            self.barcode = self.decode(img_file)
         else:
             return
 
         self.ids['img'].source = img_file
-        print(barcode)
+        print(self.barcode)
         
     def decode(self, img_file):
         img = Image.open(img_file)
@@ -156,6 +181,26 @@ class ScannerScreen(Screen):
             print(e)
 
         return None
+
+    def issue_book(self):
+        global token
+        headers = {'x-access-token': token}
+        res = requests.put('{}/issue/{}'.format(url, self.barcode), headers=headers)
+        if res.status_code == 200:
+            print(res.json())
+            self.manager.transition.direction = 'right'
+            self.manager.current = 'dashboard_screen'
+
+    def return_book(self):
+        global token
+        headers = {'x-access-token': token}
+        res = requests.put('{}/return/{}'.format(url, self.barcode), headers=headers)
+        if res.status_code == 200:
+            print(res.json())
+            self.manager.transition.direction = 'right'
+            self.manager.current = 'dashboard_screen'
+
+
 
 class LoginApp(App):
 
